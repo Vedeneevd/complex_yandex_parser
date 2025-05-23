@@ -1,12 +1,13 @@
 import asyncio
 import os
-
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
 from aiogram.types import Message
+from dotenv import load_dotenv
+
 from yandex_parser import YandexParser  # Импортируем ваш парсер
 
-
+load_dotenv()
 
 # Токен бота
 BOT_TOKEN = os.getenv("BOT_TOKEN")
@@ -30,91 +31,108 @@ async def start_handler(message: Message):
     )
 
 
+def format_revenue(revenue_data: dict) -> str:
+    """Форматирует информацию о выручке для вывода"""
+    if not revenue_data:
+        return "Информация о выручке не найдена"
+
+    result = []
+    for inn, revenue in revenue_data.items():
+        result.append(f"- ИНН {inn}: {revenue}")
+    return "\n".join(result)
+
+
 @dp.message()
-async def query_handler(message: Message):
+async def any_message_handler(message: Message):
     user_id = message.from_user.id
 
-    # Проверяем, ожидаем ли мы запрос от пользователя
-    if user_id not in user_sessions or user_sessions[user_id]["state"] != "waiting_query":
+    # Если пользователь не начал диалог командой /start
+    if user_id not in user_sessions:
         await message.answer("Пожалуйста, начните с команды /start")
         return
 
-    query = message.text.strip()
-    if not query:
-        await message.answer("Пожалуйста, введите непустой запрос")
-        return
+    # Если пользователь уже начал диалог, но еще не отправил запрос
+    if user_sessions[user_id]["state"] == "waiting_query":
+        query = message.text.strip()
+        if not query:
+            await message.answer("Пожалуйста, введите непустой запрос")
+            return
 
-    # Меняем состояние пользователя
-    user_sessions[user_id]["state"] = "processing"
+        # Меняем состояние пользователя
+        user_sessions[user_id]["state"] = "processing"
 
-    # Отправляем сообщение о начале обработки
-    processing_msg = await message.answer(f"🔍 Начинаю поиск по запросу: {query}\nЭто может занять 1-2 минуты...")
+        # Отправляем сообщение о начале обработки
+        processing_msg = await message.answer(f"🔍 Начинаю поиск по запросу: {query}\nЭто может занять 1-2 минуты...")
 
-    try:
-        # Запускаем парсер
-        parser = YandexParser()
         try:
-            links = parser.get_search_results(query)
+            # Запускаем парсер
+            with YandexParser() as parser:
+                links = parser.get_search_results(query)
 
-            if not links:
-                await message.answer("По вашему запросу ничего не найдено 😕")
-                return
+                if not links:
+                    await message.answer("По вашему запросу ничего не найдено 😕")
+                    return
 
-            # Отправляем результаты по частям (из-за ограничения длины в Telegram)
-            result_text = f"📊 Найдено {len(links)} результатов по запросу '{query}':\n\n"
-            part = []
-            current_length = 0
+                # Отправляем общее количество результатов
+                await message.answer(f"📊 Найдено {len(links)} результатов по запросу '{query}':")
 
-            for i, url in enumerate(links[:10], 1):
-                phones, inns = parser.extract_contacts(url)
+                # Обрабатываем каждый сайт
+                for i, url in enumerate(links[:10], 1):
+                    try:
+                        contacts = parser.extract_contacts(url)
 
-                site_info = f"{i}. {url}\n"
-                if phones:
-                    site_info += "📞 Телефоны:\n" + "\n".join(f"- {p}" for p in phones) + "\n"
-                else:
-                    'Телефоны для этого сайта не найдены'
-                if inns:
-                    site_info += "🔢 ИНН:\n" + "\n".join(f"- {inn}" for inn in inns) + "\n"
-                else:
-                    'ИНН на этом сайте не найдены'
-                site_info += "\n"
+                        if contacts['skipped']:
+                            continue
 
+                        # Формируем сообщение
+                        site_info = f"\n{i}. <b>{url}</b>\n"
 
+                        # Телефоны
+                        if contacts['phones']:
+                            site_info += "\n📞 <b>Телефоны:</b>\n" + "\n".join(
+                                f"- {p}" for p in contacts['phones']) + "\n"
+                        else:
+                            site_info += "\nТелефоны для этого сайта не найдены\n"
 
-                # Разбиваем на сообщения по ~4000 символов
-                if current_length + len(site_info) > 4000:
-                    await message.answer("\n".join(part))
-                    part = []
-                    current_length = 0
+                        # ИНН
+                        if contacts['inns']:
+                            site_info += "\n🔢 <b>ИНН:</b>\n" + "\n".join(f"- {inn}" for inn in contacts['inns']) + "\n"
 
-                part.append(site_info)
-                current_length += len(site_info)
+                            # Выручка
+                            if contacts['revenues']:
+                                site_info += "\n💰 <b>Выручка:</b>\n" + format_revenue(contacts['revenues']) + "\n"
+                        else:
+                            site_info += "\nИНН на этом сайте не найдены\n"
 
-            if part:
-                await message.answer("\n".join(part))
+                        # Отправляем сообщение
+                        await message.answer(site_info, parse_mode="HTML")
 
-            # Финальное сообщение
-            await message.answer(
-                "Был рад помочь!\n\n"
-                "Если хочешь собрать конкурентов по другому запросу пришли мне 1 слово или словосочетание "
-                "по которому твои потенциальные клиенты ищут тебя в Яндексе 👇"
-            )
+                        # Небольшая задержка между сообщениями
+                        await asyncio.sleep(1)
+
+                    except Exception as e:
+                        print(f"Ошибка при обработке {url}: {str(e)}")
+                        continue
+
+                # Финальное сообщение
+                await message.answer(
+                    "Был рад помочь!\n\n"
+                    "Если хочешь собрать конкурентов по другому запросу пришли мне 1 слово или словосочетание "
+                    "по которому твои потенциальные клиенты ищут тебя в Яндексе 👇"
+                )
+
+        except Exception as e:
+            await message.answer(f"Произошла ошибка при обработке запроса: {str(e)}")
 
         finally:
-            parser.close()
+            # Удаляем сообщение о обработке
+            try:
+                await bot.delete_message(chat_id=message.chat.id, message_id=processing_msg.message_id)
+            except:
+                pass
 
-    except Exception as e:
-        await message.answer(f"Произошла ошибка при обработке запроса: {str(e)}")
-
-    finally:
-        # Удаляем сообщение о обработке
-        try:
-            await bot.delete_message(chat_id=message.chat.id, message_id=processing_msg.message_id)
-        except:
-            pass
-
-        # Возвращаем пользователя в исходное состояние
-        user_sessions[user_id] = {"state": "waiting_query"}
+            # Возвращаем пользователя в исходное состояние
+            user_sessions[user_id] = {"state": "waiting_query"}
 
 
 async def main():
