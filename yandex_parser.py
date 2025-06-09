@@ -283,6 +283,44 @@ class YandexParser:
             print(f"Ошибка поиска: {str(e)}")
             return []
 
+    def get_commercial_search_results(self, query: str, max_results: int = 10) -> List[str]:
+        """Получение рекламных ссылок из коммерческого поиска Яндекса"""
+        commercial_search_url = f"https://yandex.ru/search/ads?lr=100&text={quote_plus(query)}"
+        self.driver.get(commercial_search_url)
+        self.human_like_delay()
+
+        try:
+            self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '.serp-item')))
+            links = []
+
+            # Селектор для извлечения рекламных ссылок
+            selectors = ['a[href*="yabs.yandex.ru"]']  # Ищем только рекламные ссылки
+
+            for selector in selectors:
+                if len(links) >= max_results:
+                    break
+
+                items = self.driver.find_elements(By.CSS_SELECTOR, selector)
+                for item in items:
+                    try:
+                        href = item.get_attribute('href')
+                        clean_url = self.clean_url(href)
+
+                        # Пропускаем только пустые или нежелательные ссылки
+                        if clean_url and clean_url not in links:
+                            links.append(clean_url)
+                            if len(links) >= max_results:
+                                break
+                    except Exception as e:
+                        print(f"Ошибка при обработке ссылки: {str(e)}")
+                        continue
+
+            return links[:max_results]
+
+        except Exception as e:
+            print(f"Ошибка при получении коммерческих ссылок: {str(e)}")
+            return []
+
 
     def clean_url(self, url: str) -> str:
         """Очистка URL от параметров отслеживания и проверка на нежелательные домены"""
@@ -504,14 +542,45 @@ class YandexParser:
 # Пример использования для Telegram бота
 if __name__ == "__main__":
     with YandexParser(headless=False) as parser:
-        query = "Строительство бань Москва"
-        print(f"Поиск по запросу: {query}")
+        query = "Строительство корпусов Москва"
+        print(f"Проводим обычный поиск по запросу: {query}")
 
+        # Обычный поиск
         links = parser.get_search_results(query)
-        print(f"Найдено результатов: {len(links)}")
+        print(f"Найдено результатов в обычном поиске: {len(links)}")
 
         for i, url in enumerate(links, 1):
-            print(f"\n{i}. Анализ: {url}")
+            print(f"\n{i}. Анализ (Обычный поиск): {url}")
+            contacts = parser.extract_contacts(url)
+
+            if contacts['skipped']:
+                print("Сайт пропущен (в черном списке)")
+                continue
+
+            if contacts['phones']:
+                print("Телефоны:")
+                for p in contacts['phones']:
+                    print(f"- {p}")
+            else:
+                print("Телефоны не найдены")
+
+            if contacts['inns']:
+                print("ИНН:")
+                for inn in contacts['inns']:
+                    print(f"- {inn}")
+                    if inn in contacts['revenues']:
+                        print(f"  Выручка: {contacts['revenues'][inn]}")
+            else:
+                print("ИНН не найдены")
+
+        print(f"\nТеперь переходим к коммерческому поиску по запросу: {query}")
+
+        # Коммерческий поиск
+        commercial_links = parser.get_commercial_search_results(query)
+        print(f"Найдено рекламных ссылок в коммерческом поиске: {len(commercial_links)}")
+
+        for i, url in enumerate(commercial_links, 1):
+            print(f"\n{i}. Анализ (Коммерческий поиск): {url}")
             contacts = parser.extract_contacts(url)
 
             if contacts['skipped']:
