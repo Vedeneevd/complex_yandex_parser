@@ -67,91 +67,90 @@ class YandexParser:
             self.base_url = "https://api.rucaptcha.com"
 
         def get_image_as_base64(self, url):
-            """Загружает изображение и возвращает в base64"""
+            """Загружает изображение и возвращает его в формате base64"""
             response = requests.get(url)
             return base64.b64encode(response.content).decode('utf-8')
 
-        def solve_captcha(self):
-            """Основной метод решения капчи"""
+        def solve_checkbox_captcha(self):
+            """Решение чекбокс капчи 'Я не робот'"""
             try:
-                # 1. Получаем изображение капчи
-                captcha_wrapper = self.wait.until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, '.AdvancedCaptcha-ImageWrapper')))
-                captcha_img = captcha_wrapper.find_element(By.TAG_NAME, 'img')
-                captcha_url = captcha_img.get_attribute('src')
+                # 1. Проверяем наличие чекбокс-капчи
+                if len(self.driver.find_elements(By.CSS_SELECTOR, '.CheckboxCaptcha')) > 0:
+                    print("Обнаружена чекбокс-капча")
 
-                # 2. Получаем изображение задания
-                task_element = self.wait.until(
-                    EC.presence_of_element_located((By.CSS_SELECTOR, '.AdvancedCaptcha-SilhouetteTask')))
-                task_img = task_element.find_elements(By.TAG_NAME, 'img')[1]  # Берем второе изображение
-                task_url = task_img.get_attribute('src')
+                    checkbox = self.wait.until(
+                        EC.element_to_be_clickable((By.CSS_SELECTOR, '.CheckboxCaptcha-Button'))
+                    )
 
-                print("Получаем изображения капчи...")
-                captcha_base64 = self.get_image_as_base64(captcha_url)
-                task_base64 = self.get_image_as_base64(task_url)
+                    # Человечный клик
+                    action = ActionChains(self.driver)
+                    action.move_to_element(checkbox).pause(random.uniform(0.2, 0.5)).click().perform()
+                    print("Чекбокс 'Я не робот' отмечен")
 
-                # 3. Отправляем капчу на решение
-                print("Отправляем капчу в RuCaptcha...")
-                task_id = self.send_to_rucaptcha(captcha_base64, task_base64)
-
-                if not task_id:
-                    return False
-
-                # 4. Получаем решение
-                print("Ожидаем решение капчи...")
-                solution = self.get_solution(task_id)
-
-                if not solution:
-                    return False
-
-                # 5. Кликаем по координатам
-                print("Выполняем клики по координатам...")
-                self.click_coordinates(captcha_img, solution)
-
-                # 6. Отправляем решение
-                submit_btn = self.wait.until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, '.AdvancedCaptcha-Submit')))
-                submit_btn.click()
-
-                print("Капча успешно решена!")
-                return True
-
+                    time.sleep(random.uniform(2, 3))  # Важная задержка
+                    return True
+                return False
             except Exception as e:
-                print(f"Ошибка при решении капчи: {str(e)}")
+                print(f"Ошибка при решении чекбокс капчи: {str(e)}")
                 return False
 
-        def send_to_rucaptcha(self, captcha_base64, task_base64):
-            """Отправка капчи в RuCaptcha"""
-            payload = {
-                "clientKey": self.api_key,
-                "task": {
-                    "type": "CoordinatesTask",
-                    "body": captcha_base64,
-                    "imginstructions": task_base64,
-                    "comment": "Кликните в указанном порядке | Click in the following order"
-                }
-            }
-
+        def solve_graphical_captcha(self):
+            """Решение графической капчи с использованием RuCaptcha API"""
             try:
+                # 1. Получаем элемент с изображением капчи
+                captcha_element = self.wait.until(
+                    EC.visibility_of_element_located((By.CSS_SELECTOR, '.AdvancedCaptcha-Image'))
+                )
+
+                # 2. Делаем скриншот капчи
+                captcha_path = 'captcha.png'
+                captcha_element.screenshot(captcha_path)
+
+                # 3. Преобразуем изображение в Base64
+                with open(captcha_path, 'rb') as f:
+                    image_base64 = base64.b64encode(f.read()).decode('utf-8')
+
+                # 4. Создаем задачу на решение капчи в RuCaptcha
+                payload = {
+                    'clientKey': self.api_key,
+                    'task': {
+                        'type': 'CoordinatesTask',
+                        'body': image_base64,
+                        'comment': 'Пожалуйста, кликните на все объекты, указанные в задании'
+                    },
+                    'languagePool': 'rn'  # Русский язык
+                }
+
+                # Отправляем запрос для создания задачи
                 response = requests.post(
-                    f"{self.base_url}/createTask",
+                    f'{self.base_url}/createTask',
                     json=payload,
                     timeout=30
                 )
-                data = response.json()
+                response.raise_for_status()
+                task_data = response.json()
 
-                if data.get('errorId') != 0:
-                    print(f"Ошибка API: {data.get('errorDescription')}")
-                    return None
+                if task_data.get('errorId', 1) != 0:
+                    raise Exception(f"Ошибка API: {task_data.get('errorDescription', 'Неизвестная ошибка API')}")
 
-                return data['taskId']
+                task_id = task_data['taskId']
+                print(f"Задача создана, ID: {task_id}")
+
+                # 5. Ожидаем решения задачи
+                solution = self.get_solution(task_id)
+                if not solution:
+                    return False
+
+                # 6. Кликаем по координатам
+                self.click_coordinates(captcha_element, solution)
+                return True
 
             except Exception as e:
-                print(f"Ошибка при отправке капчи: {str(e)}")
-                return None
+                print(f"Ошибка при решении графической капчи: {str(e)}")
+                return False
 
         def get_solution(self, task_id, timeout=120):
-            """Получение решения капчи"""
+            """Получение решения капчи через RuCaptcha API"""
             start_time = time.time()
 
             while time.time() - start_time < timeout:
@@ -183,7 +182,7 @@ class YandexParser:
             return None
 
         def click_coordinates(self, captcha_element, coordinates):
-            """Клики по полученным координатам"""
+            """Кликаем по полученным координатам на изображении"""
             for point in coordinates:
                 x = int(point['x'])
                 y = int(point['y'])
@@ -199,131 +198,23 @@ class YandexParser:
                 action.click()
                 action.perform()
 
-    def solve_yandex_captcha(self):
-        """Комплексное решение Яндекс капчи с использованием RuCaptcha API"""
-        try:
-            # 1. Проверяем наличие чекбокс-капчи "Я не робот"
-            if len(self.driver.find_elements(By.CSS_SELECTOR, '.CheckboxCaptcha')) > 0:
-                print("Обнаружена чекбокс-капча")
-                checkbox = self.wait.until(
-                    EC.element_to_be_clickable((By.CSS_SELECTOR, '.CheckboxCaptcha-Button')))
-
-                # Человекоподобное взаимодействие
-                action = ActionChains(self.driver)
-                action.move_to_element(checkbox).pause(random.uniform(0.2, 0.5)).click().perform()
-                print("Чекбокс 'Я не робот' отмечен")
-                time.sleep(random.uniform(2, 3))  # Важная задержка
-
-            # 2. Проверяем наличие графической капчи
-            if len(self.driver.find_elements(By.CSS_SELECTOR, '.AdvancedCaptcha')) > 0:
-                print("Обнаружена графическая капча")
-
-                # Получаем элемент с капчей
-                captcha_element = self.wait.until(
-                    EC.visibility_of_element_located((By.CSS_SELECTOR, '.AdvancedCaptcha-Image')))
-
-                # Делаем скриншот элемента капчи
-                captcha_path = 'captcha.png'
-                captcha_element.screenshot(captcha_path)
-
-                # Подготавливаем задание для RuCaptcha
-                try:
-                    print("Отправляем капчу в RuCaptcha...")
-
-                    # Читаем изображение как base64
-                    with open(captcha_path, 'rb') as f:
-                        image_base64 = base64.b64encode(f.read()).decode('utf-8')
-
-                    # Параметры для API RuCaptcha
-                    params = {
-                        'clientKey': os.getenv('RUCAPTCHA_API_KEY'),
-                        'task': {
-                            'type': 'CoordinatesTask',
-                            'body': image_base64,
-                            'comment': 'Пожалуйста, кликните на все объекты, указанные в задании'
-                        },
-                        'languagePool': 'rn'  # Русский язык
-                    }
-
-                    # Отправляем запрос к API RuCaptcha
-                    response = requests.post(
-                        'https://api.rucaptcha.com/createTask',
-                        json=params,
-                        timeout=30
-                    )
-                    response.raise_for_status()
-                    task_data = response.json()
-
-                    if task_data.get('errorId', 1) != 0:
-                        raise Exception(f"RuCaptcha API error: {task_data.get('errorDescription', 'Unknown error')}")
-
-                    task_id = task_data['taskId']
-                    print(f"Задание создано, ID: {task_id}")
-
-                    # Ожидаем решения (максимум 120 секунд)
-                    for _ in range(24):
-                        time.sleep(5)
-                        result_response = requests.post(
-                            'https://api.rucaptcha.com/getTaskResult',
-                            json={
-                                'clientKey': os.getenv('RUCAPTCHA_API_KEY'),
-                                'taskId': task_id
-                            },
-                            timeout=10
-                        )
-                        result_data = result_response.json()
-
-                        if result_data.get('errorId', 1) != 0:
-                            raise Exception(
-                                f"RuCaptcha API error: {result_data.get('errorDescription', 'Unknown error')}")
-
-                        if result_data['status'] == 'ready':
-                            print("Капча успешно решена")
-                            break
-                    else:
-                        raise Exception("Превышено время ожидания решения капчи")
-
-                    # Получаем координаты кликов
-                    solution = result_data['solution']['coordinates']
-                    print(f"Получены координаты: {solution}")
-
-                    # Кликаем по всем точкам
-                    for point in solution:
-                        x = point['x']
-                        y = point['y']
-
-                        # Человекоподобное движение и клик
-                        action = ActionChains(self.driver)
-                        action.move_to_element_with_offset(
-                            captcha_element, x, y
-                        ).pause(random.uniform(0.1, 0.3)).click().perform()
-                        time.sleep(random.uniform(0.2, 0.5))
-
-                    # Отправляем решение
-                    submit = self.wait.until(
-                        EC.element_to_be_clickable((By.CSS_SELECTOR, '.AdvancedCaptcha-Submit')))
-                    submit.click()
-
-                    # Ждем исчезновения капчи
-                    self.wait.until(EC.invisibility_of_element_located(
-                        (By.CSS_SELECTOR, '.AdvancedCaptcha')))
-                    print("Капча успешно пройдена")
-
+        def solve_yandex_captcha(self):
+            """Комплексное решение Яндекс капчи"""
+            try:
+                # 1. Проверка на наличие чекбокс-капчи "Я не робот"
+                if self.solve_checkbox_captcha():
                     return True
 
-                except Exception as e:
-                    print(f"Ошибка при работе с RuCaptcha API: {str(e)}")
-                    return False
-                finally:
-                    if os.path.exists(captcha_path):
-                        os.remove(captcha_path)
+                # 2. Решение графической капчи
+                if self.solve_graphical_captcha():
+                    return True
 
-            return True
+                return False
 
-        except Exception as e:
-            print(f"Критическая ошибка при обработке капчи: {str(e)}")
-            self.driver.save_screenshot('captcha_error.png')
-            return False
+            except Exception as e:
+                print(f"Критическая ошибка при решении капчи: {str(e)}")
+                self.driver.save_screenshot('captcha_error.png')
+                return False
 
 
 
@@ -527,13 +418,28 @@ class YandexParser:
             company_link.click()
 
             # Ожидание загрузки страницы с выручкой
-            revenue_element = self.wait.until(
+            revenue_title_element = self.wait.until(
                 EC.presence_of_element_located(
-                    (By.XPATH, "//div[contains(text(),'Выручка')]/following-sibling::div")
+                    (By.XPATH, "//div[contains(text(),'Выручка')]")
                 )
             )
 
-            return revenue_element.text
+            # Ищем соседний элемент с выручкой
+            revenue_value_element = revenue_title_element.find_element(
+                By.XPATH, "following-sibling::div"
+            )
+
+            # Проверяем, если выручка найдена
+            if revenue_value_element:
+                revenue_text = revenue_value_element.text.strip()
+                if revenue_text:
+                    return revenue_text
+                else:
+                    print("Выручка не найдена")
+                    return "Выручка не найдена"
+            else:
+                print("Выручка не найдена")
+                return "Выручка не найдена"
 
         except TimeoutException:
             print(f"Не удалось найти данные по ИНН {inn} на datanewton.ru")
@@ -598,7 +504,7 @@ class YandexParser:
 # Пример использования для Telegram бота
 if __name__ == "__main__":
     with YandexParser(headless=False) as parser:
-        query = "бурение скважин Москва"
+        query = "Строительство бань Москва"
         print(f"Поиск по запросу: {query}")
 
         links = parser.get_search_results(query)
