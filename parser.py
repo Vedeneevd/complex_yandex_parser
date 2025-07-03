@@ -2,10 +2,12 @@ import asyncio
 import os
 import re
 from typing import List
+import pandas as pd
+from io import BytesIO
 
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, BufferedInputFile
 from dotenv import load_dotenv
 
 from yandex_parser import SiteParser  # Импортируем наш парсер
@@ -44,6 +46,68 @@ def extract_urls(text: str) -> List[str]:
     return URL_PATTERN.findall(text)
 
 
+def create_excel_report(data: list) -> bytes:
+    """Создает Excel-файл с результатами парсинга и возвращает bytes"""
+    # Подготовка данных для DataFrame
+    rows = []
+    for item in data:
+        for phone in item['phones']:
+            for inn in item['inns']:
+                rows.append({
+                    'URL': item['url'],
+                    'Телефон': phone,
+                    'ИНН': inn,
+                    'Выручка': item['revenues'].get(inn, 'Нет данных'),
+                    'Статус': 'Пропущен' if item['skipped'] else 'Обработан'
+                })
+
+        # Если есть телефоны, но нет ИНН
+        if item['phones'] and not item['inns']:
+            for phone in item['phones']:
+                rows.append({
+                    'URL': item['url'],
+                    'Телефон': phone,
+                    'ИНН': 'Не найден',
+                    'Выручка': 'Нет данных',
+                    'Статус': 'Пропущен' if item['skipped'] else 'Обработан'
+                })
+
+        # Если есть ИНН, но нет телефонов
+        if item['inns'] and not item['phones']:
+            for inn in item['inns']:
+                rows.append({
+                    'URL': item['url'],
+                    'Телефон': 'Не найден',
+                    'ИНН': inn,
+                    'Выручка': item['revenues'].get(inn, 'Нет данных'),
+                    'Статус': 'Пропущен' if item['skipped'] else 'Обработан'
+                })
+
+    # Создаем DataFrame
+    df = pd.DataFrame(rows, columns=['URL', 'Телефон', 'ИНН', 'Выручка', 'Статус'])
+
+    # Создаем Excel-файл в BytesIO
+    output = BytesIO()
+    with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        df.to_excel(writer, index=False, sheet_name='Результаты')
+
+        # Получаем объект workbook и worksheet для форматирования
+        workbook = writer.book
+        worksheet = writer.sheets['Результаты']
+
+        # Устанавливаем ширину столбцов
+        worksheet.set_column('A:A', 40)  # URL
+        worksheet.set_column('B:B', 20)  # Телефон
+        worksheet.set_column('C:C', 15)  # ИНН
+        worksheet.set_column('D:D', 30)  # Выручка
+        worksheet.set_column('E:E', 12)  # Статус
+
+        # Добавляем фильтры
+        worksheet.autofilter(0, 0, 0, 4)
+
+    return output.getvalue()
+
+
 @dp.message(Command("start"))
 async def start_handler(message: Message):
     user_id = message.from_user.id
@@ -73,6 +137,8 @@ async def any_message_handler(message: Message):
     # Отправляем сообщение о начале обработки
     processing_msg = await message.answer(f"🔍 Начинаю анализ {len(urls)} сайтов... Это может занять 1-2 минуты...")
 
+    all_results = []
+
     try:
         # Запускаем парсер
         with SiteParser() as parser:
@@ -80,6 +146,7 @@ async def any_message_handler(message: Message):
             for i, url in enumerate(urls[:10], 1):  # Ограничиваем 10 сайтами за раз
                 try:
                     contacts = parser.extract_contacts(url)
+                    all_results.append(contacts)
 
                     if contacts['skipped']:
                         await message.answer(f"Сайт {url} пропущен (в черном списке)")
@@ -115,6 +182,15 @@ async def any_message_handler(message: Message):
                     print(f"Ошибка при обработке {url}: {str(e)}")
                     await message.answer(f"Ошибка при обработке сайта {url}")
                     continue
+
+            # Создаем и отправляем Excel-файл
+            if all_results:
+                excel_data = create_excel_report(all_results)
+                excel_file = BufferedInputFile(excel_data, filename="Результаты_анализа.xlsx")
+                await message.answer_document(
+                    excel_file,
+                    caption="Вот результаты анализа в удобном формате"
+                )
 
             # Финальное сообщение
             await message.answer(
