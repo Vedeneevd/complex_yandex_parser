@@ -17,6 +17,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from fake_useragent import UserAgent
 from selenium.common.exceptions import TimeoutException
 from webdriver_manager.chrome import ChromeDriverManager
+import pandas as pd
+from io import BytesIO
 
 
 class SiteParser:
@@ -292,18 +294,17 @@ class SiteParser:
 
             # 2. Кликаем по первой найденной компании
             try:
-                # Ждем появления списка компаний
+                # Ждем появления списка компаний (15 секунд максимум)
                 WebDriverWait(self.driver, 15).until(
                     EC.presence_of_element_located((By.CSS_SELECTOR, ".list-group.list-group-flush"))
                 )
 
-                # Проверяем, есть ли результаты
-                no_results = self.driver.find_elements(By.XPATH, "//*[contains(text(), 'ничего не найдено')]")
-                if no_results:
-                    print(f"Компания с ИНН {inn} не найдена на datanewton.ru")
+                # Проверяем наличие результатов
+                if self.driver.find_elements(By.XPATH, "//*[contains(text(), 'ничего не найдено')]"):
+                    print(f"Компания с ИНН {inn} не найдена")
                     return None
 
-                # Находим и кликаем первую компанию в списке
+                # Кликаем по первой компании в списке
                 first_company = WebDriverWait(self.driver, 15).until(
                     EC.element_to_be_clickable(
                         (By.CSS_SELECTOR, ".list-group.list-group-flush a.list-group-item:first-child"))
@@ -311,54 +312,24 @@ class SiteParser:
                 first_company.click()
                 self.human_like_delay()
 
-                # 3. Ждем загрузки страницы компании и данных о выручке
-                try:
-                    WebDriverWait(self.driver, 15).until(
-                        EC.presence_of_element_located((By.XPATH, "//div[contains(text(),'Выручка')]"))
-                    )
+                # 3. Получаем данные о выручке
+                WebDriverWait(self.driver, 15).until(
+                    EC.presence_of_element_located((By.XPATH, "//div[contains(text(),'Выручка')]"))
+                )
 
-                    # 4. Извлекаем значение выручки
-                    revenue_element = self.driver.find_element(
-                        By.XPATH, "//div[contains(text(),'Выручка')]/following-sibling::div"
-                    )
-                    revenue = revenue_element.text.strip()
-
-                    # Дополнительно пытаемся получить другие финансовые показатели
-                    financial_data = {'Выручка': revenue}
-
-                    try:
-                        profit_element = self.driver.find_element(
-                            By.XPATH, "//div[contains(text(),'Чистая прибыль')]/following-sibling::div"
-                        )
-                        financial_data['Чистая прибыль'] = profit_element.text.strip()
-                    except:
-                        pass
-
-                    try:
-                        employees_element = self.driver.find_element(
-                            By.XPATH, "//div[contains(text(),'Сотрудники')]/following-sibling::div"
-                        )
-                        financial_data['Сотрудники'] = employees_element.text.strip()
-                    except:
-                        pass
-
-                    # Форматируем результат
-                    if len(financial_data) == 1:
-                        return f"Выручка: {revenue}"
-                    else:
-                        return "\n".join([f"{k}: {v}" for k, v in financial_data.items()])
-
-                except TimeoutException:
-                    print(f"Не удалось найти данные о выручке для ИНН {inn}")
-                    return None
+                revenue_element = self.driver.find_element(
+                    By.XPATH, "//div[contains(text(),'Выручка')]/following-sibling::div"
+                )
+                return revenue_element.text.strip()
 
             except TimeoutException:
-                print(f"Не удалось найти компанию с ИНН {inn} в результатах поиска")
+                print(f"Не удалось найти данные о выручке для ИНН {inn}")
                 return None
 
         except Exception as e:
-            print(f"Ошибка при получении данных для ИНН {inn}: {str(e)}")
+            print(f"Ошибка при обработке ИНН {inn}: {str(e)}")
             return None
+
 
     def extract_contacts(self, url: str) -> Dict[str, any]:
         """Основной метод извлечения контактов с проверкой на нежелательные домены"""
