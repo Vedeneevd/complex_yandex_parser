@@ -1,0 +1,384 @@
+2025-07-03 09:49:36,620 - __main__ - INFO - Бот запущен
+2025-07-03 09:49:36,621 - aiogram.dispatcher - INFO - Start polling
+2025-07-03 09:49:36,966 - aiogram.dispatcher - INFO - Run polling for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 09:49:45,671 - __main__ - INFO - Пользователь 6326719341 начал сессию
+2025-07-03 09:49:46,020 - aiogram.event - INFO - Update id=747701968 is handled. Duration 343 ms by bot id=7147721800
+2025-07-03 09:50:53,146 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 09:50:53,146 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 09:50:53,438 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 09:50:53,579 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 09:50:56,069 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:50:56,382 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:50:56,690 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 09:50:58,891 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 09:50:58,891 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 09:50:58,891 - __main__ - INFO - Обработка URL: https://stavropol.ecostroy29.ru/
+2025-07-03 09:50:58,891 - yandex_parser - INFO - Начинаем обработку URL: https://stavropol.ecostroy29.ru/
+2025-07-03 09:51:03,442 - yandex_parser - INFO - Обработка URL https://stavropol.ecostroy29.ru/ завершена успешно
+2025-07-03 09:51:03,619 - __main__ - INFO - URL https://stavropol.ecostroy29.ru/ обработан успешно
+2025-07-03 09:51:07,529 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 09:51:07,658 - aiogram.event - INFO - Update id=747701969 is handled. Duration 14515 ms by bot id=7147721800
+2025-07-03 09:52:02,840 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 09:52:02,841 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 09:52:03,068 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 09:52:03,164 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 09:52:05,927 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:52:06,294 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:52:06,600 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 09:52:08,697 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 09:52:08,697 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 09:52:08,698 - __main__ - INFO - Обработка URL: https://stavropol.maxistroy116.ru/services/stroitelstvo-ban/
+2025-07-03 09:52:08,698 - yandex_parser - INFO - Начинаем обработку URL: https://stavropol.maxistroy116.ru/services/stroitelstvo-ban/
+2025-07-03 09:52:16,992 - yandex_parser - INFO - Обработка URL https://stavropol.maxistroy116.ru/services/stroitelstvo-ban/ завершена успешно
+2025-07-03 09:52:17,275 - __main__ - INFO - URL https://stavropol.maxistroy116.ru/services/stroitelstvo-ban/ обработан успешно
+2025-07-03 09:52:20,764 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 09:52:20,957 - aiogram.event - INFO - Update id=747701970 is handled. Duration 18125 ms by bot id=7147721800
+2025-07-03 09:53:35,641 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 09:53:35,641 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 09:53:36,179 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 09:53:36,283 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 09:53:38,867 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:53:39,470 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:53:39,795 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 09:53:42,873 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 09:53:42,874 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 09:53:42,874 - __main__ - INFO - Обработка URL: https://proekt-bani.ru/
+2025-07-03 09:53:42,874 - yandex_parser - INFO - Начинаем обработку URL: https://proekt-bani.ru/
+2025-07-03 09:54:12,883 - yandex_parser - ERROR - Ошибка при обработке https://proekt-bani.ru/: Message: timeout: Timed out receiving message from renderer: 28.221
+  (Session info: chrome=138.0.7204.97)
+Stacktrace:
+	GetHandleVerifier [0x0xe64553+62419]
+	GetHandleVerifier [0x0xe64594+62484]
+	(No symbol) [0x0xca2133]
+	(No symbol) [0x0xc92e8b]
+	(No symbol) [0x0xc92bc1]
+	(No symbol) [0x0xc90b64]
+	(No symbol) [0x0xc9162d]
+	(No symbol) [0x0xc9ddc9]
+	(No symbol) [0x0xcaf2b5]
+	(No symbol) [0x0xcb4ce6]
+	(No symbol) [0x0xc91c6d]
+	(No symbol) [0x0xcaf05e]
+	(No symbol) [0x0xd30b5c]
+	(No symbol) [0x0xd0f266]
+	(No symbol) [0x0xcde852]
+	(No symbol) [0x0xcdf6f4]
+	GetHandleVerifier [0x0x10d4833+2619059]
+	GetHandleVerifier [0x0x10cfc4a+2599626]
+	GetHandleVerifier [0x0xe8b0fa+221050]
+	GetHandleVerifier [0x0xe7b378+156152]
+	GetHandleVerifier [0x0xe81d2d+183213]
+	GetHandleVerifier [0x0xe6c438+94904]
+	GetHandleVerifier [0x0xe6c5c2+95298]
+	GetHandleVerifier [0x0xe5771a+9626]
+	BaseThreadInitThunk [0x0x7508fcc9+25]
+	RtlGetAppContainerNamedObjectPath [0x0x76fa82ae+286]
+	RtlGetAppContainerNamedObjectPath [0x0x76fa827e+238]
+Traceback (most recent call last):
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\yandex_parser.py", line 109, in extract_contacts
+    self.driver.get(url)
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 472, in get
+    self.execute(Command.GET, {"url": url})
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.TimeoutException: Message: timeout: Timed out receiving message from renderer: 28.221
+  (Session info: chrome=138.0.7204.97)
+Stacktrace:
+	GetHandleVerifier [0x0xe64553+62419]
+	GetHandleVerifier [0x0xe64594+62484]
+	(No symbol) [0x0xca2133]
+	(No symbol) [0x0xc92e8b]
+	(No symbol) [0x0xc92bc1]
+	(No symbol) [0x0xc90b64]
+	(No symbol) [0x0xc9162d]
+	(No symbol) [0x0xc9ddc9]
+	(No symbol) [0x0xcaf2b5]
+	(No symbol) [0x0xcb4ce6]
+	(No symbol) [0x0xc91c6d]
+	(No symbol) [0x0xcaf05e]
+	(No symbol) [0x0xd30b5c]
+	(No symbol) [0x0xd0f266]
+	(No symbol) [0x0xcde852]
+	(No symbol) [0x0xcdf6f4]
+	GetHandleVerifier [0x0x10d4833+2619059]
+	GetHandleVerifier [0x0x10cfc4a+2599626]
+	GetHandleVerifier [0x0xe8b0fa+221050]
+	GetHandleVerifier [0x0xe7b378+156152]
+	GetHandleVerifier [0x0xe81d2d+183213]
+	GetHandleVerifier [0x0xe6c438+94904]
+	GetHandleVerifier [0x0xe6c5c2+95298]
+	GetHandleVerifier [0x0xe5771a+9626]
+	BaseThreadInitThunk [0x0x7508fcc9+25]
+	RtlGetAppContainerNamedObjectPath [0x0x76fa82ae+286]
+	RtlGetAppContainerNamedObjectPath [0x0x76fa827e+238]
+
+2025-07-03 09:54:12,899 - __main__ - WARNING - URL https://proekt-bani.ru/ пропущен
+2025-07-03 09:54:15,753 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 09:54:15,857 - aiogram.event - INFO - Update id=747701971 is handled. Duration 40218 ms by bot id=7147721800
+2025-07-03 09:55:58,369 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 09:55:58,370 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 09:55:58,504 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 09:55:58,641 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 09:56:01,394 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:56:01,694 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:56:01,993 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 09:56:04,498 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 09:56:04,500 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 09:56:04,502 - __main__ - INFO - Обработка URL: https://msk.bani-ka.ru/projects/bani
+2025-07-03 09:56:04,504 - yandex_parser - INFO - Начинаем обработку URL: https://msk.bani-ka.ru/projects/bani
+2025-07-03 09:56:10,624 - yandex_parser - INFO - Обработка URL https://msk.bani-ka.ru/projects/bani завершена успешно
+2025-07-03 09:56:10,768 - __main__ - INFO - URL https://msk.bani-ka.ru/projects/bani обработан успешно
+2025-07-03 09:56:14,705 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 09:56:14,814 - aiogram.event - INFO - Update id=747701972 is handled. Duration 16452 ms by bot id=7147721800
+2025-07-03 09:58:18,484 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 09:58:18,485 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 09:58:18,607 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 09:58:18,760 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 09:58:21,326 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:58:21,625 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 09:58:21,910 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 09:58:23,420 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 09:58:23,421 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 09:58:23,421 - __main__ - INFO - Обработка URL: https://stroymir53.ru/bani/
+2025-07-03 09:58:23,421 - yandex_parser - INFO - Начинаем обработку URL: https://stroymir53.ru/bani/
+2025-07-03 09:58:28,538 - yandex_parser - INFO - Обработка URL https://stroymir53.ru/bani/ завершена успешно
+2025-07-03 09:58:28,674 - __main__ - INFO - URL https://stroymir53.ru/bani/ обработан успешно
+2025-07-03 09:58:32,120 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 09:58:32,229 - aiogram.event - INFO - Update id=747701973 is handled. Duration 13734 ms by bot id=7147721800
+2025-07-03 10:00:08,661 - aiogram.dispatcher - INFO - Polling stopped
+2025-07-03 10:00:20,936 - __main__ - INFO - Бот запущен
+2025-07-03 10:00:20,936 - aiogram.dispatcher - INFO - Start polling
+2025-07-03 10:00:21,284 - aiogram.dispatcher - INFO - Run polling for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 10:00:32,217 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:00:32,219 - __main__ - WARNING - Пользователь 6326719341 не начал сессию
+2025-07-03 10:00:32,566 - aiogram.event - INFO - Update id=747701974 is handled. Duration 358 ms by bot id=7147721800
+2025-07-03 10:00:38,170 - __main__ - INFO - Пользователь 6326719341 начал сессию
+2025-07-03 10:00:38,307 - aiogram.event - INFO - Update id=747701975 is handled. Duration 141 ms by bot id=7147721800
+2025-07-03 10:00:40,994 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:00:40,994 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:00:41,125 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:00:41,247 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 10:00:43,525 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:00:43,792 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:00:44,062 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 10:00:45,715 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 10:00:45,715 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 10:00:45,715 - __main__ - INFO - Обработка URL: https://stroymir53.ru/bani/
+2025-07-03 10:00:45,715 - yandex_parser - INFO - Начинаем обработку URL: https://stroymir53.ru/bani/
+2025-07-03 10:00:52,452 - yandex_parser - INFO - Обработка URL https://stroymir53.ru/bani/ завершена успешно
+2025-07-03 10:00:52,592 - __main__ - INFO - URL https://stroymir53.ru/bani/ обработан успешно
+2025-07-03 10:00:56,064 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 10:00:56,225 - aiogram.event - INFO - Update id=747701976 is handled. Duration 15234 ms by bot id=7147721800
+2025-07-03 10:01:38,109 - aiogram.dispatcher - INFO - Polling stopped
+2025-07-03 10:12:38,820 - __main__ - INFO - Бот запущен
+2025-07-03 10:12:38,820 - aiogram.dispatcher - INFO - Start polling
+2025-07-03 10:12:39,157 - aiogram.dispatcher - INFO - Run polling for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 10:12:39,286 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:12:39,287 - __main__ - WARNING - Пользователь 6326719341 не начал сессию
+2025-07-03 10:12:39,665 - aiogram.event - INFO - Update id=747701977 is handled. Duration 375 ms by bot id=7147721800
+2025-07-03 10:12:43,212 - __main__ - INFO - Пользователь 6326719341 начал сессию
+2025-07-03 10:12:43,384 - aiogram.event - INFO - Update id=747701978 is handled. Duration 172 ms by bot id=7147721800
+2025-07-03 10:12:44,572 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:12:44,572 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:12:44,694 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:12:44,792 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 10:12:47,272 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:12:47,550 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:12:47,827 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 10:12:49,415 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 10:12:49,415 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 10:12:49,415 - __main__ - INFO - Обработка URL: https://stroymir53.ru/bani/
+2025-07-03 10:12:49,416 - yandex_parser - INFO - Начинаем обработку URL: https://stroymir53.ru/bani/
+2025-07-03 10:13:00,758 - yandex_parser - INFO - Обработка URL https://stroymir53.ru/bani/ завершена успешно
+2025-07-03 10:13:01,132 - __main__ - INFO - URL https://stroymir53.ru/bani/ обработан успешно
+2025-07-03 10:13:04,713 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 10:13:04,813 - aiogram.event - INFO - Update id=747701979 is handled. Duration 20250 ms by bot id=7147721800
+2025-07-03 10:13:35,611 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:13:35,613 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:13:35,763 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:13:35,992 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 10:13:38,220 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:13:38,525 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:13:38,885 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 10:13:40,668 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 10:13:40,669 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 10:13:40,669 - __main__ - INFO - Обработка URL: https://msk.bani-ka.ru/projects/bani
+2025-07-03 10:13:40,669 - yandex_parser - INFO - Начинаем обработку URL: https://msk.bani-ka.ru/projects/bani
+2025-07-03 10:13:51,796 - yandex_parser - INFO - Обработка URL https://msk.bani-ka.ru/projects/bani завершена успешно
+2025-07-03 10:13:52,299 - __main__ - INFO - URL https://msk.bani-ka.ru/projects/bani обработан успешно
+2025-07-03 10:13:55,849 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 10:13:55,957 - aiogram.event - INFO - Update id=747701980 is handled. Duration 20358 ms by bot id=7147721800
+2025-07-03 10:18:45,750 - aiogram.dispatcher - INFO - Polling stopped
+2025-07-03 10:28:16,105 - __main__ - INFO - Бот запущен
+2025-07-03 10:28:16,106 - aiogram.dispatcher - INFO - Start polling
+2025-07-03 10:28:16,434 - aiogram.dispatcher - INFO - Run polling for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 10:28:23,202 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:28:23,203 - __main__ - WARNING - Пользователь 6326719341 не начал сессию
+2025-07-03 10:28:23,618 - aiogram.event - INFO - Update id=747701981 is handled. Duration 422 ms by bot id=7147721800
+2025-07-03 10:28:25,664 - __main__ - INFO - Пользователь 6326719341 начал сессию
+2025-07-03 10:28:25,830 - aiogram.event - INFO - Update id=747701982 is handled. Duration 171 ms by bot id=7147721800
+2025-07-03 10:28:27,088 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:28:27,089 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:28:27,668 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:28:27,812 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 10:28:30,355 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:28:30,666 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:28:30,943 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 10:28:33,091 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 10:28:33,092 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 10:28:33,092 - __main__ - INFO - Обработка URL: https://msk.bani-ka.ru/projects/bani
+2025-07-03 10:28:33,092 - yandex_parser - INFO - Начинаем обработку URL: https://msk.bani-ka.ru/projects/bani
+2025-07-03 10:28:44,187 - yandex_parser - INFO - Обработка URL https://msk.bani-ka.ru/projects/bani завершена успешно
+2025-07-03 10:28:44,582 - __main__ - INFO - URL https://msk.bani-ka.ru/projects/bani обработан успешно
+2025-07-03 10:28:48,228 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 10:28:48,347 - aiogram.event - INFO - Update id=747701983 is handled. Duration 21266 ms by bot id=7147721800
+2025-07-03 10:28:57,815 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:28:57,815 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:28:57,952 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:28:58,051 - WDM - INFO - ====== WebDriver manager ======
+2025-07-03 10:29:00,473 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:29:00,786 - WDM - INFO - Get LATEST chromedriver version for google-chrome
+2025-07-03 10:29:01,089 - WDM - INFO - Driver [C:\Users\User\.wdm\drivers\chromedriver\win64\138.0.7204.92\chromedriver-win32/chromedriver.exe] found in cache
+2025-07-03 10:29:03,276 - yandex_parser - INFO - WebDriver успешно инициализирован
+2025-07-03 10:29:03,276 - yandex_parser - INFO - Парсер инициализирован
+2025-07-03 10:29:03,276 - __main__ - INFO - Обработка URL: https://stroymir53.ru/bani/
+2025-07-03 10:29:03,276 - yandex_parser - INFO - Начинаем обработку URL: https://stroymir53.ru/bani/
+2025-07-03 10:29:14,685 - yandex_parser - INFO - Обработка URL https://stroymir53.ru/bani/ завершена успешно
+2025-07-03 10:29:15,474 - __main__ - INFO - URL https://stroymir53.ru/bani/ обработан успешно
+2025-07-03 10:29:19,075 - yandex_parser - INFO - WebDriver успешно закрыт
+2025-07-03 10:29:19,202 - aiogram.event - INFO - Update id=747701984 is handled. Duration 21391 ms by bot id=7147721800
+2025-07-03 10:29:28,608 - aiogram.dispatcher - INFO - Polling stopped
+2025-07-03 10:29:28,890 - aiogram.dispatcher - INFO - Polling stopped for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 10:35:32,111 - __main__ - INFO - Бот запущен
+2025-07-03 10:35:32,111 - aiogram.dispatcher - INFO - Start polling
+2025-07-03 10:35:32,449 - aiogram.dispatcher - INFO - Run polling for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 10:35:40,334 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:35:40,335 - __main__ - WARNING - Пользователь 6326719341 не начал сессию
+2025-07-03 10:35:40,655 - aiogram.event - INFO - Update id=747701985 is handled. Duration 313 ms by bot id=7147721800
+2025-07-03 10:35:42,941 - __main__ - INFO - Пользователь 6326719341 начал сессию
+2025-07-03 10:35:43,086 - aiogram.event - INFO - Update id=747701986 is handled. Duration 141 ms by bot id=7147721800
+2025-07-03 10:35:44,546 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:35:44,547 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:35:44,674 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:35:44,820 - __main__ - ERROR - Произошла ошибка: SiteParser.__init__() got an unexpected keyword argument 'headless'
+Traceback (most recent call last):
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\parser.py", line 89, in any_message_handler
+    with SiteParser(headless=True) as parser:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: SiteParser.__init__() got an unexpected keyword argument 'headless'
+2025-07-03 10:35:44,934 - aiogram.event - INFO - Update id=747701987 is handled. Duration 391 ms by bot id=7147721800
+2025-07-03 10:37:32,751 - aiogram.dispatcher - INFO - Polling stopped
+2025-07-03 10:37:51,224 - __main__ - INFO - Бот запущен
+2025-07-03 10:37:51,224 - aiogram.dispatcher - INFO - Start polling
+2025-07-03 10:37:51,543 - aiogram.dispatcher - INFO - Run polling for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 10:37:57,967 - __main__ - INFO - Пользователь 6326719341 начал сессию
+2025-07-03 10:37:58,447 - aiogram.event - INFO - Update id=747701988 is handled. Duration 483 ms by bot id=7147721800
+2025-07-03 10:38:04,786 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:38:04,786 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:38:04,974 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:38:11,261 - selenium.webdriver.common.selenium_manager - WARNING - The chromedriver version (136.0.7103.94) detected in PATH at C:\chromedriver\chromedriver.exe might not be compatible with the detected chrome version (138.0.7204.97); currently, chromedriver 138.0.7204.92 is recommended for chrome 138.*, so it is advised to delete the driver in PATH and retry
+2025-07-03 10:38:16,163 - __main__ - ERROR - Произошла ошибка: Message: session not created: This version of ChromeDriver only supports Chrome version 136
+Current browser version is 138.0.7204.97 with binary path C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+Stacktrace:
+	GetHandleVerifier [0x00007FF6A60ECF65+75717]
+	GetHandleVerifier [0x00007FF6A60ECFC0+75808]
+	(No symbol) [0x00007FF6A5EB8F9A]
+	(No symbol) [0x00007FF6A5EFD1DF]
+	(No symbol) [0x00007FF6A5EFC22B]
+	(No symbol) [0x00007FF6A5EF6518]
+	(No symbol) [0x00007FF6A5EF1ADD]
+	(No symbol) [0x00007FF6A5F452D8]
+	(No symbol) [0x00007FF6A5F448B0]
+	(No symbol) [0x00007FF6A5F37153]
+	(No symbol) [0x00007FF6A5F00421]
+	(No symbol) [0x00007FF6A5F011B3]
+	GetHandleVerifier [0x00007FF6A63ED74D+3223469]
+	GetHandleVerifier [0x00007FF6A63E7CF2+3200338]
+	GetHandleVerifier [0x00007FF6A6405B23+3322755]
+	GetHandleVerifier [0x00007FF6A6106A3A+180890]
+	GetHandleVerifier [0x00007FF6A610E13F+211359]
+	GetHandleVerifier [0x00007FF6A60F52B4+109332]
+	GetHandleVerifier [0x00007FF6A60F5462+109762]
+	GetHandleVerifier [0x00007FF6A60DBA79+4825]
+	BaseThreadInitThunk [0x00007FFF37B17374+20]
+	RtlUserThreadStart [0x00007FFF38F5CC91+33]
+Traceback (most recent call last):
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\parser.py", line 89, in any_message_handler
+    with SiteParser(headless=True) as parser:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\yandex_parser.py", line 58, in __init__
+    self.driver = webdriver.Chrome(options=chrome_options)
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\chrome\webdriver.py", line 47, in __init__
+    super().__init__(
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\chromium\webdriver.py", line 69, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 257, in __init__
+    self.start_session(capabilities)
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 356, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\remote\webdriver.py", line 447, in execute
+    self.error_handler.check_response(response)
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\.venv\Lib\site-packages\selenium\webdriver\remote\errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.SessionNotCreatedException: Message: session not created: This version of ChromeDriver only supports Chrome version 136
+Current browser version is 138.0.7204.97 with binary path C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+Stacktrace:
+	GetHandleVerifier [0x00007FF6A60ECF65+75717]
+	GetHandleVerifier [0x00007FF6A60ECFC0+75808]
+	(No symbol) [0x00007FF6A5EB8F9A]
+	(No symbol) [0x00007FF6A5EFD1DF]
+	(No symbol) [0x00007FF6A5EFC22B]
+	(No symbol) [0x00007FF6A5EF6518]
+	(No symbol) [0x00007FF6A5EF1ADD]
+	(No symbol) [0x00007FF6A5F452D8]
+	(No symbol) [0x00007FF6A5F448B0]
+	(No symbol) [0x00007FF6A5F37153]
+	(No symbol) [0x00007FF6A5F00421]
+	(No symbol) [0x00007FF6A5F011B3]
+	GetHandleVerifier [0x00007FF6A63ED74D+3223469]
+	GetHandleVerifier [0x00007FF6A63E7CF2+3200338]
+	GetHandleVerifier [0x00007FF6A6405B23+3322755]
+	GetHandleVerifier [0x00007FF6A6106A3A+180890]
+	GetHandleVerifier [0x00007FF6A610E13F+211359]
+	GetHandleVerifier [0x00007FF6A60F52B4+109332]
+	GetHandleVerifier [0x00007FF6A60F5462+109762]
+	GetHandleVerifier [0x00007FF6A60DBA79+4825]
+	BaseThreadInitThunk [0x00007FFF37B17374+20]
+	RtlUserThreadStart [0x00007FFF38F5CC91+33]
+
+2025-07-03 10:38:16,348 - aiogram.event - INFO - Update id=747701989 is handled. Duration 11562 ms by bot id=7147721800
+2025-07-03 10:40:00,587 - aiogram.dispatcher - INFO - Polling stopped
+2025-07-03 10:41:29,224 - __main__ - INFO - Бот запущен
+2025-07-03 10:41:29,225 - aiogram.dispatcher - INFO - Start polling
+2025-07-03 10:41:29,578 - aiogram.dispatcher - INFO - Run polling for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 10:41:34,665 - __main__ - INFO - Пользователь 6326719341 начал сессию
+2025-07-03 10:41:35,491 - aiogram.event - INFO - Update id=747701990 is handled. Duration 827 ms by bot id=7147721800
+2025-07-03 10:41:44,015 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:41:44,015 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:41:44,169 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:41:44,320 - __main__ - ERROR - Произошла ошибка: SiteParser.__init__() got an unexpected keyword argument 'headless'
+Traceback (most recent call last):
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\parser.py", line 89, in any_message_handler
+    with SiteParser(headless=True) as parser:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: SiteParser.__init__() got an unexpected keyword argument 'headless'
+2025-07-03 10:41:44,477 - aiogram.event - INFO - Update id=747701991 is handled. Duration 452 ms by bot id=7147721800
+2025-07-03 10:42:16,808 - __main__ - INFO - Бот запущен
+2025-07-03 10:42:16,811 - aiogram.dispatcher - INFO - Start polling
+2025-07-03 10:42:17,139 - aiogram.dispatcher - INFO - Run polling for bot @Complex_Parser_bot id=7147721800 - 'ComplexParserBot'
+2025-07-03 10:42:31,048 - __main__ - INFO - Пользователь 6326719341 начал сессию
+2025-07-03 10:42:31,429 - aiogram.event - INFO - Update id=747701992 is handled. Duration 375 ms by bot id=7147721800
+2025-07-03 10:42:40,135 - __main__ - INFO - Получено сообщение от пользователя 6326719341
+2025-07-03 10:42:40,136 - __main__ - INFO - Получено URL для обработки: 1
+2025-07-03 10:42:40,263 - __main__ - INFO - Начата обработка 1 сайтов
+2025-07-03 10:42:40,396 - __main__ - ERROR - Произошла ошибка: 'type' object does not support the context manager protocol
+Traceback (most recent call last):
+  File "C:\Users\User\Desktop\PythonProjects\ComplexParserBot\parser.py", line 89, in any_message_handler
+    with SiteParser as parser:
+TypeError: 'type' object does not support the context manager protocol
+2025-07-03 10:42:40,502 - aiogram.event - INFO - Update id=747701993 is handled. Duration 375 ms by bot id=7147721800
+2025-07-03 10:48:54,300 - aiogram.dispatcher - INFO - Polling stopped
