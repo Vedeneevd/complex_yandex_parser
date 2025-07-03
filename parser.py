@@ -10,9 +10,6 @@ from dotenv import load_dotenv
 
 from yandex_parser import SiteParser  # Импортируем наш парсер
 
-import pandas as pd
-from io import BytesIO
-
 load_dotenv()
 
 # Токен бота
