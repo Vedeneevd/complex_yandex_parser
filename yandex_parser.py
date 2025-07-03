@@ -66,31 +66,182 @@ class SiteParser:
         """Случайная задержка между действиями"""
         time.sleep(random.uniform(1.0, 3.0))
 
+    class YandexCaptchaSolver:
+        def __init__(self, driver, api_key):
+            self.driver = driver
+            self.api_key = api_key
+            self.wait = WebDriverWait(driver, 20)
+            self.base_url = "https://api.rucaptcha.com"
+
+        def get_image_as_base64(self, url):
+            """Загружает изображение и возвращает в base64"""
+            response = requests.get(url)
+            return base64.b64encode(response.content).decode('utf-8')
+
+        def solve_captcha(self):
+            """Основной метод решения капчи"""
+            try:
+                # 1. Получаем изображение капчи
+                captcha_wrapper = self.wait.until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, '.AdvancedCaptcha-ImageWrapper')))
+                captcha_img = captcha_wrapper.find_element(By.TAG_NAME, 'img')
+                captcha_url = captcha_img.get_attribute('src')
+
+                # 2. Получаем изображение задания
+                task_element = self.wait.until(
+                    EC.presence_of_element_located((By.CSS_SELECTOR, '.AdvancedCaptcha-SilhouetteTask')))
+                task_img = task_element.find_elements(By.TAG_NAME, 'img')[1]  # Берем второе изображение
+                task_url = task_img.get_attribute('src')
+
+                print("Получаем изображения капчи...")
+                captcha_base64 = self.get_image_as_base64(captcha_url)
+                task_base64 = self.get_image_as_base64(task_url)
+
+                # 3. Отправляем капчу на решение
+                print("Отправляем капчу в RuCaptcha...")
+                task_id = self.send_to_rucaptcha(captcha_base64, task_base64)
+
+                if not task_id:
+                    return False
+
+                # 4. Получаем решение
+                print("Ожидаем решение капчи...")
+                solution = self.get_solution(task_id)
+
+                if not solution:
+                    return False
+
+                # 5. Кликаем по координатам
+                print("Выполняем клики по координатам...")
+                self.click_coordinates(captcha_img, solution)
+
+                # 6. Отправляем решение
+                submit_btn = self.wait.until(
+                    EC.element_to_be_clickable((By.CSS_SELECTOR, '.AdvancedCaptcha-Submit')))
+                submit_btn.click()
+
+                print("Капча успешно решена!")
+                return True
+
+            except Exception as e:
+                print(f"Ошибка при решении капчи: {str(e)}")
+                return False
+
+        def send_to_rucaptcha(self, captcha_base64, task_base64):
+            """Отправка капчи в RuCaptcha"""
+            payload = {
+                "clientKey": self.api_key,
+                "task": {
+                    "type": "CoordinatesTask",
+                    "body": captcha_base64,
+                    "imginstructions": task_base64,
+                    "comment": "Кликните в указанном порядке | Click in the following order"
+                }
+            }
+
+            try:
+                response = requests.post(
+                    f"{self.base_url}/createTask",
+                    json=payload,
+                    timeout=30
+                )
+                data = response.json()
+
+                if data.get('errorId') != 0:
+                    print(f"Ошибка API: {data.get('errorDescription')}")
+                    return None
+
+                return data['taskId']
+
+            except Exception as e:
+                print(f"Ошибка при отправке капчи: {str(e)}")
+                return None
+
+        def get_solution(self, task_id, timeout=120):
+            """Получение решения капчи"""
+            start_time = time.time()
+
+            while time.time() - start_time < timeout:
+                try:
+                    response = requests.get(
+                        f"{self.base_url}/getTaskResult",
+                        params={
+                            'clientKey': self.api_key,
+                            'taskId': task_id
+                        },
+                        timeout=10
+                    )
+                    data = response.json()
+
+                    if data.get('errorId') != 0:
+                        print(f"Ошибка API: {data.get('errorDescription')}")
+                        return None
+
+                    if data['status'] == 'ready':
+                        return data['solution']['coordinates']
+
+                    time.sleep(5)  # Проверяем каждые 5 секунд
+
+                except Exception as e:
+                    print(f"Ошибка при проверке решения: {str(e)}")
+                    time.sleep(5)
+
+            print("Время ожидания решения истекло")
+            return None
+
+        def click_coordinates(self, captcha_element, coordinates):
+            """Клики по полученным координатам"""
+            for point in coordinates:
+                x = int(point['x'])
+                y = int(point['y'])
+
+                # Добавляем случайные задержки для имитации человеческого поведения
+                delay = random.uniform(0.1, 0.3)
+                time.sleep(delay)
+
+                # Плавное перемещение и клик
+                action = ActionChains(self.driver)
+                action.move_to_element_with_offset(captcha_element, x, y)
+                action.pause(delay)
+                action.click()
+                action.perform()
+
     def solve_yandex_captcha(self):
-        """Решение Яндекс капчи"""
+        """Комплексное решение Яндекс капчи с использованием RuCaptcha API"""
         try:
-            # Проверяем наличие чекбокс-капчи "Я не робот"
+            # 1. Проверяем наличие чекбокс-капчи "Я не робот"
             if len(self.driver.find_elements(By.CSS_SELECTOR, '.CheckboxCaptcha')) > 0:
                 print("Обнаружена чекбокс-капча")
                 checkbox = self.wait.until(
                     EC.element_to_be_clickable((By.CSS_SELECTOR, '.CheckboxCaptcha-Button')))
-                checkbox.click()
-                print("Чекбокс 'Я не робот' отмечен")
-                time.sleep(random.uniform(2, 3))
 
-            # Проверяем наличие графической капчи
+                # Человекоподобное взаимодействие
+                action = ActionChains(self.driver)
+                action.move_to_element(checkbox).pause(random.uniform(0.2, 0.5)).click().perform()
+                print("Чекбокс 'Я не робот' отмечен")
+                time.sleep(random.uniform(2, 3))  # Важная задержка
+
+            # 2. Проверяем наличие графической капчи
             if len(self.driver.find_elements(By.CSS_SELECTOR, '.AdvancedCaptcha')) > 0:
                 print("Обнаружена графическая капча")
+
+                # Получаем элемент с капчей
                 captcha_element = self.wait.until(
                     EC.visibility_of_element_located((By.CSS_SELECTOR, '.AdvancedCaptcha-Image')))
+
+                # Делаем скриншот элемента капчи
                 captcha_path = 'captcha.png'
                 captcha_element.screenshot(captcha_path)
 
+                # Подготавливаем задание для RuCaptcha
                 try:
                     print("Отправляем капчу в RuCaptcha...")
+
+                    # Читаем изображение как base64
                     with open(captcha_path, 'rb') as f:
                         image_base64 = base64.b64encode(f.read()).decode('utf-8')
 
+                    # Параметры для API RuCaptcha
                     params = {
                         'clientKey': os.getenv('RUCAPTCHA_API_KEY'),
                         'task': {
@@ -98,9 +249,10 @@ class SiteParser:
                             'body': image_base64,
                             'comment': 'Пожалуйста, кликните на все объекты, указанные в задании'
                         },
-                        'languagePool': 'rn'
+                        'languagePool': 'rn'  # Русский язык
                     }
 
+                    # Отправляем запрос к API RuCaptcha
                     response = requests.post(
                         'https://api.rucaptcha.com/createTask',
                         json=params,
@@ -115,7 +267,7 @@ class SiteParser:
                     task_id = task_data['taskId']
                     print(f"Задание создано, ID: {task_id}")
 
-                    # Ожидаем решения
+                    # Ожидаем решения (максимум 120 секунд)
                     for _ in range(24):
                         time.sleep(5)
                         result_response = requests.post(
@@ -138,40 +290,40 @@ class SiteParser:
                     else:
                         raise Exception("Превышено время ожидания решения капчи")
 
+                    # Получаем координаты кликов
                     solution = result_data['solution']['coordinates']
                     print(f"Получены координаты: {solution}")
 
+                    # Кликаем по всем точкам
                     for point in solution:
                         x = point['x']
                         y = point['y']
+
+                        # Человекоподобное движение и клик
                         action = ActionChains(self.driver)
                         action.move_to_element_with_offset(
                             captcha_element, x, y
                         ).pause(random.uniform(0.1, 0.3)).click().perform()
                         time.sleep(random.uniform(0.2, 0.5))
 
+                    # Отправляем решение
                     submit = self.wait.until(
                         EC.element_to_be_clickable((By.CSS_SELECTOR, '.AdvancedCaptcha-Submit')))
                     submit.click()
 
+                    # Ждем исчезновения капчи
                     self.wait.until(EC.invisibility_of_element_located(
                         (By.CSS_SELECTOR, '.AdvancedCaptcha')))
                     print("Капча успешно пройдена")
+
                     return True
 
-                except Exception as e:
-                    print(f"Ошибка при работе с RuCaptcha API: {str(e)}")
-                    return False
-                finally:
-                    if os.path.exists(captcha_path):
-                        os.remove(captcha_path)
+                return False
 
-            return True
-
-        except Exception as e:
-            print(f"Критическая ошибка при обработке капчи: {str(e)}")
-            self.driver.save_screenshot('captcha_error.png')
-            return False
+            except Exception as e:
+                print(f"Критическая ошибка при решении капчи: {str(e)}")
+                self.driver.save_screenshot('captcha_error.png')
+                return False
 
     def should_skip_url(self, url: str) -> bool:
         """Проверяет, нужно ли пропускать URL"""
@@ -183,6 +335,84 @@ class SiteParser:
             return False
         except:
             return False
+
+    def get_search_results(self, query: str, max_results: int = 10) -> List[str]:
+        """Поиск в Яндексе по запросу с фильтрацией нежелательных доменов"""
+        url = f"https://yandex.ru/search/?text={quote_plus(query)}&lr=213"
+        self.driver.get(url)
+        self.human_like_delay()
+
+        # Проверяем наличие капчи и решаем ее
+        try:
+            if self.driver.find_elements(By.CSS_SELECTOR, '.AdvancedCaptcha'):
+                if not self.solve_image_captcha():
+                    print("Не удалось решить капчу, пробуем продолжить...")
+        except:
+            pass
+
+        # Имитация поведения пользователя
+        for _ in range(2):
+            self.driver.execute_script("window.scrollBy(0, window.innerHeight * 0.7)")
+            self.human_like_delay()
+
+        try:
+            self.wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '.serp-item')))
+            links = []
+
+            # Несколько стратегий поиска результатов
+            selectors = [
+                '.serp-item .OrganicTitle-Link',  # Основные результаты
+                '.Organic .Link',  # Альтернативный селектор
+                'a[href*="yabs.yandex.ru"]'  # Рекламные ссылки
+            ]
+
+            for selector in selectors:
+                if len(links) >= max_results:
+                    break
+
+                items = self.driver.find_elements(By.CSS_SELECTOR, selector)
+                for item in items:
+                    try:
+                        href = item.get_attribute('href')
+                        clean_url = self.clean_url(href)
+
+                        # Пропускаем нежелательные домены
+                        if clean_url and not self.should_skip_url(clean_url) and clean_url not in links:
+                            links.append(clean_url)
+                            if len(links) >= max_results:
+                                break
+                    except:
+                        continue
+
+            return links[:max_results]
+
+        except Exception as e:
+            print(f"Ошибка поиска: {str(e)}")
+            return []
+
+
+    def clean_url(self, url: str) -> str:
+        """Очистка URL от параметров отслеживания и проверка на нежелательные домены"""
+        try:
+            parsed = urlparse(url)
+
+            # Пропускаем нежелательные домены сразу
+            domain = parsed.netloc.lower()
+            for skip_domain in self.SKIP_DOMAINS:
+                if domain == skip_domain or domain.endswith(f".{skip_domain}"):
+                    return None
+
+            if 'yabs.yandex.ru' in domain:
+                qs = parse_qs(parsed.query)
+                clean_url = qs.get('url', [url])[0]
+                # Проверяем очищенный URL на нежелательные домены
+                return clean_url if not self.should_skip_url(clean_url) else None
+
+            return url if url and not url.startswith('https://yandex.ru') else None
+        except:
+            return None
+
+
 
     @staticmethod
     def normalize_phone(phone: str) -> str:
@@ -317,40 +547,14 @@ class SiteParser:
                         EC.presence_of_element_located((By.XPATH, "//div[contains(text(),'Выручка')]"))
                     )
 
-                    # 4. Извлекаем значение выручки
-                    revenue_element = self.driver.find_element(
-                        By.XPATH, "//div[contains(text(),'Выручка')]/following-sibling::div"
-                    )
-                    revenue = revenue_element.text.strip()
+            # Ожидание загрузки страницы с выручкой
+            revenue_element = self.wait.until(
+                EC.presence_of_element_located(
+                    (By.XPATH, "//div[contains(text(),'Выручка')]/following-sibling::div")
+                )
+            )
 
-                    # Дополнительно пытаемся получить другие финансовые показатели
-                    financial_data = {'Выручка': revenue}
-
-                    try:
-                        profit_element = self.driver.find_element(
-                            By.XPATH, "//div[contains(text(),'Чистая прибыль')]/following-sibling::div"
-                        )
-                        financial_data['Чистая прибыль'] = profit_element.text.strip()
-                    except:
-                        pass
-
-                    try:
-                        employees_element = self.driver.find_element(
-                            By.XPATH, "//div[contains(text(),'Сотрудники')]/following-sibling::div"
-                        )
-                        financial_data['Сотрудники'] = employees_element.text.strip()
-                    except:
-                        pass
-
-                    # Форматируем результат
-                    if len(financial_data) == 1:
-                        return f"Выручка: {revenue}"
-                    else:
-                        return "\n".join([f"{k}: {v}" for k, v in financial_data.items()])
-
-                except TimeoutException:
-                    print(f"Не удалось найти данные о выручке для ИНН {inn}")
-                    return None
+            return revenue_element.text
 
             except TimeoutException:
                 print(f"Не удалось найти компанию с ИНН {inn} в результатах поиска")
@@ -419,3 +623,36 @@ class SiteParser:
             self.driver.quit()
         except:
             pass
+
+# Пример использования для Telegram бота
+if __name__ == "__main__":
+    with YandexParser(headless=False) as parser:
+        query = "бурение скважин Москва"
+        print(f"Поиск по запросу: {query}")
+
+        links = parser.get_search_results(query)
+        print(f"Найдено результатов: {len(links)}")
+
+        for i, url in enumerate(links, 1):
+            print(f"\n{i}. Анализ: {url}")
+            contacts = parser.extract_contacts(url)
+
+            if contacts['skipped']:
+                print("Сайт пропущен (в черном списке)")
+                continue
+
+            if contacts['phones']:
+                print("Телефоны:")
+                for p in contacts['phones']:
+                    print(f"- {p}")
+            else:
+                print("Телефоны не найдены")
+
+            if contacts['inns']:
+                print("ИНН:")
+                for inn in contacts['inns']:
+                    print(f"- {inn}")
+                    if inn in contacts['revenues']:
+                        print(f"  Выручка: {contacts['revenues'][inn]}")
+            else:
+                print("ИНН не найдены")
