@@ -1,44 +1,67 @@
 import asyncio
 import os
 import re
-from typing import List
+from typing import List, Dict
+from collections import defaultdict
 import pandas as pd
 from io import BytesIO
-
-from aiogram import Bot, Dispatcher
+from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from aiogram.types import Message, BufferedInputFile
 from dotenv import load_dotenv
+from yandex_parser import SiteParser
 
-from yandex_parser import SiteParser  # Импортируем наш парсер
-
+# Загрузка переменных окружения
 load_dotenv()
 
-# Токен бота
+# Конфигурация бота
 BOT_TOKEN = os.getenv("BOT_TOKEN")
+MAX_CONCURRENT_REQUESTS = 3  # Максимальное количество одновременных запросов
+MAX_URLS_PER_REQUEST = 10  # Максимальное количество URL в одном запросе
 
 # Инициализация бота и диспетчера
 bot = Bot(token=BOT_TOKEN)
 dp = Dispatcher()
 
-# Словарь для хранения состояния пользователей
+# Словари для управления состоянием
 user_sessions = {}
+active_requests = defaultdict(int)  # Счетчик активных запросов по пользователям
+request_semaphore = asyncio.Semaphore(MAX_CONCURRENT_REQUESTS)  # Глобальный семафор
 
 # Регулярное выражение для поиска URL
 URL_PATTERN = re.compile(
     r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
 )
 
+# Смайлики для оформления
+EMOJIS = {
+    "start": "👋",
+    "error": "❌",
+    "success": "✅",
+    "warning": "⚠️",
+    "search": "🔍",
+    "phone": "📞",
+    "inn": "🔢",
+    "money": "💰",
+    "doc": "📊",
+    "time": "⏳",
+    "check": "✔️",
+    "cancel": "✖️",
+    "rocket": "🚀",
+    "chart": "📈",
+    "tada": "🎉",
+    "thinking": "🤔",
+    "wait": "⏱️",
+    "queue": "📋"
+}
 
-def format_revenue(revenue_data: dict) -> str:
+
+def format_revenue(revenue_data: Dict[str, str]) -> str:
     """Форматирует информацию о выручке для вывода"""
     if not revenue_data:
-        return "Информация о выручке не найдена"
+        return f"{EMOJIS['warning']} Информация о выручке не найдена"
 
-    result = []
-    for inn, revenue in revenue_data.items():
-        result.append(f"- ИНН {inn}: {revenue}")
-    return "\n".join(result)
+    return "\n".join(f"➖ ИНН {inn}: {revenue}" for inn, revenue in revenue_data.items())
 
 
 def extract_urls(text: str) -> List[str]:
@@ -46,11 +69,11 @@ def extract_urls(text: str) -> List[str]:
     return URL_PATTERN.findall(text)
 
 
-def create_excel_report(data: list) -> bytes:
-    """Создает Excel-файл с результатами парсинга и возвращает bytes"""
-    # Подготовка данных для DataFrame
+async def create_excel_report(data: List[Dict]) -> BufferedInputFile:
+    """Создает Excel-файл с результатами парсинга"""
     rows = []
     for item in data:
+        # Обработка всех комбинаций телефонов и ИНН
         for phone in item['phones']:
             for inn in item['inns']:
                 rows.append({
@@ -61,7 +84,7 @@ def create_excel_report(data: list) -> bytes:
                     'Статус': 'Пропущен' if item['skipped'] else 'Обработан'
                 })
 
-        # Если есть телефоны, но нет ИНН
+        # Обработка случаев, когда есть только телефоны или только ИНН
         if item['phones'] and not item['inns']:
             for phone in item['phones']:
                 rows.append({
@@ -72,7 +95,6 @@ def create_excel_report(data: list) -> bytes:
                     'Статус': 'Пропущен' if item['skipped'] else 'Обработан'
                 })
 
-        # Если есть ИНН, но нет телефонов
         if item['inns'] and not item['phones']:
             for inn in item['inns']:
                 rows.append({
@@ -83,130 +105,152 @@ def create_excel_report(data: list) -> bytes:
                     'Статус': 'Пропущен' if item['skipped'] else 'Обработан'
                 })
 
-    # Создаем DataFrame
-    df = pd.DataFrame(rows, columns=['URL', 'Телефон', 'ИНН', 'Выручка', 'Статус'])
-
-    # Создаем Excel-файл в BytesIO
+    # Создание DataFrame и Excel-файла
+    df = pd.DataFrame(rows)
     output = BytesIO()
     with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-        df.to_excel(writer, index=False, sheet_name='Результаты')
-
-        # Получаем объект workbook и worksheet для форматирования
-        workbook = writer.book
-        worksheet = writer.sheets['Результаты']
-
-        # Устанавливаем ширину столбцов
-        worksheet.set_column('A:A', 40)  # URL
-        worksheet.set_column('B:B', 20)  # Телефон
-        worksheet.set_column('C:C', 15)  # ИНН
-        worksheet.set_column('D:D', 30)  # Выручка
-        worksheet.set_column('E:E', 12)  # Статус
-
-        # Добавляем фильтры
+        df.to_excel(writer, index=False)
+        worksheet = writer.sheets['Sheet1']
+        worksheet.set_column('A:A', 40)
+        worksheet.set_column('B:B', 20)
+        worksheet.set_column('C:C', 15)
+        worksheet.set_column('D:D', 30)
+        worksheet.set_column('E:E', 12)
         worksheet.autofilter(0, 0, 0, 4)
 
-    return output.getvalue()
+    return BufferedInputFile(output.getvalue(), filename="Результаты_анализа.xlsx")
 
 
 @dp.message(Command("start"))
 async def start_handler(message: Message):
-    user_id = message.from_user.id
-    user_sessions[user_id] = {"state": "waiting_urls"}
+    """Обработчик команды /start"""
+    user_sessions[message.from_user.id] = {"state": "waiting_urls"}
 
-    await message.answer(
-        "Привет! На связи Никита, твой помощник в анализе конкурентов для парсинга звонков с компанией Hot Clients.\n\n"
-        "Пришли мне ссылки на сайты конкурентов (одну или несколько), и я проанализирую их контактные данные."
+    welcome_msg = f"""
+{EMOJIS['start']} <b>Привет, {message.from_user.first_name}!</b> {EMOJIS['start']}
+
+Я — твой помощник для анализа конкурентов от <b>Hot Clients</b> {EMOJIS['rocket']}
+
+{EMOJIS['thinking']} <i>Мои возможности:</i>
+• Поиск контактных телефонов {EMOJIS['phone']}
+• Извлечение ИНН компаний {EMOJIS['inn']}
+• Анализ финансовых показателей {EMOJIS['chart']}
+
+{EMOJIS['success']} <b>Просто пришли мне ссылки на сайты</b> (до {MAX_URLS_PER_REQUEST} за раз)
+"""
+    await message.answer(welcome_msg, parse_mode="HTML")
+
+
+async def process_urls(message: Message, urls: List[str]):
+    """Основная функция обработки URL"""
+    processing_msg = await message.answer(
+        f"{EMOJIS['time']} <b>Анализирую {len(urls)} сайтов...</b>\n"
+        f"{EMOJIS['search']} Это может занять 1-2 минуты...",
+        parse_mode="HTML"
     )
 
-
-@dp.message()
-async def any_message_handler(message: Message):
-    user_id = message.from_user.id
-
-    # Если пользователь не начал диалог командой /start
-    if user_id not in user_sessions:
-        await message.answer("Пожалуйста, начните с команды /start")
-        return
-
-    # Извлекаем URL из сообщения
-    urls = extract_urls(message.text)
-    if not urls:
-        await message.answer("Не найдено ссылок в вашем сообщении. Пожалуйста, пришлите одну или несколько ссылок.")
-        return
-
-    # Отправляем сообщение о начале обработки
-    processing_msg = await message.answer(f"🔍 Начинаю анализ {len(urls)} сайтов... Это может занять 1-2 минуты...")
-
     all_results = []
-
     try:
-        # Запускаем парсер
         with SiteParser() as parser:
-            # Обрабатываем каждый сайт
-            for i, url in enumerate(urls[:10], 1):  # Ограничиваем 10 сайтами за раз
+            for i, url in enumerate(urls, 1):
                 try:
                     contacts = parser.extract_contacts(url)
                     all_results.append(contacts)
 
                     if contacts['skipped']:
-                        await message.answer(f"Сайт {url} пропущен (в черном списке)")
+                        await message.answer(
+                            f"{EMOJIS['cancel']} <b>Сайт пропущен:</b> {url}\n"
+                            "<i>Причина:</i> в черном списке",
+                            parse_mode="HTML"
+                        )
                         continue
 
-                    # Формируем сообщение
-                    site_info = f"\n{i}. <b>{url}</b>\n"
+                    # Формируем отчет по сайту
+                    site_report = [
+                        f"\n{EMOJIS['check']} <b>Сайт #{i}:</b> <code>{url}</code>",
+                        f"\n{EMOJIS['phone']} <b>Телефоны:</b>\n" + "\n".join(f"➖ {p}" for p in contacts['phones']) if
+                        contacts['phones'] else f"\n{EMOJIS['warning']} Телефоны не найдены",
+                        f"\n{EMOJIS['inn']} <b>ИНН:</b>\n" + "\n".join(f"➖ {inn}" for inn in contacts['inns']) if
+                        contacts['inns'] else f"\n{EMOJIS['warning']} ИНН не найдены",
+                        f"\n{EMOJIS['money']} <b>Финансовые данные:</b>\n" + format_revenue(contacts['revenues']) if
+                        contacts['revenues'] else ""
+                    ]
 
-                    # Телефоны
-                    if contacts['phones']:
-                        site_info += "\n📞 <b>Телефоны:</b>\n" + "\n".join(
-                            f"- {p}" for p in contacts['phones']) + "\n"
-                    else:
-                        site_info += "\nТелефоны для этого сайта не найдены\n"
-
-                    # ИНН
-                    if contacts['inns']:
-                        site_info += "\n🔢 <b>ИНН:</b>\n" + "\n".join(f"- {inn}" for inn in contacts['inns']) + "\n"
-
-                        # Выручка
-                        if contacts['revenues']:
-                            site_info += "\n💰 <b>Выручка:</b>\n" + format_revenue(contacts['revenues']) + "\n"
-                    else:
-                        site_info += "\nИНН на этом сайте не найдены\n"
-
-                    # Отправляем сообщение
-                    await message.answer(site_info, parse_mode="HTML")
-
-                    # Небольшая задержка между сообщениями
+                    await message.answer("\n".join(site_report), parse_mode="HTML")
                     await asyncio.sleep(1)
 
                 except Exception as e:
-                    print(f"Ошибка при обработке {url}: {str(e)}")
-                    await message.answer(f"Ошибка при обработке сайта {url}")
+                    await message.answer(
+                        f"{EMOJIS['error']} <b>Ошибка при обработке:</b> {url}\n"
+                        f"<i>Подробности:</i> {str(e)}",
+                        parse_mode="HTML"
+                    )
                     continue
 
-            # Создаем и отправляем Excel-файл
+            # Отправка итогового отчета
             if all_results:
-                excel_data = create_excel_report(all_results)
-                excel_file = BufferedInputFile(excel_data, filename="Результаты_анализа.xlsx")
+                excel_file = await create_excel_report(all_results)
                 await message.answer_document(
                     excel_file,
-                    caption="Вот результаты анализа в удобном формате"
+                    caption=f"{EMOJIS['doc']} <b>Полный отчет готов!</b>",
+                    parse_mode="HTML"
                 )
 
-            # Финальное сообщение
-            await message.answer(
-                "Был рад помочь!\n\n"
-                "Если хочешь проанализировать другие сайты, просто пришли мне ссылки на них."
-            )
-
     except Exception as e:
-        await message.answer(f"Произошла ошибка при обработке запроса: {str(e)}")
-
+        await message.answer(
+            f"{EMOJIS['error']} <b>Критическая ошибка:</b>\n"
+            f"<code>{str(e)}</code>",
+            parse_mode="HTML"
+        )
     finally:
-        # Удаляем сообщение о обработке
         try:
             await bot.delete_message(chat_id=message.chat.id, message_id=processing_msg.message_id)
         except:
             pass
+
+
+@dp.message()
+async def message_handler(message: Message):
+    """Основной обработчик сообщений"""
+    user_id = message.from_user.id
+
+    # Проверка начала диалога
+    if user_id not in user_sessions:
+        await message.answer(f"{EMOJIS['warning']} Пожалуйста, начните с команды /start")
+        return
+
+    # Проверка лимита запросов
+    if active_requests[user_id] >= MAX_CONCURRENT_REQUESTS:
+        await message.answer(
+            f"{EMOJIS['wait']} <b>Достигнут лимит запросов!</b>\n\n"
+            f"У меня сейчас {MAX_CONCURRENT_REQUESTS} активных запроса. "
+            "Пожалуйста, дождитесь их завершения.",
+            parse_mode="HTML"
+        )
+        return
+
+    # Извлечение URL
+    urls = extract_urls(message.text)
+    if not urls:
+        await message.answer(f"{EMOJIS['error']} Не найдено ссылок в сообщении!")
+        return
+
+    # Ограничение количества URL
+    if len(urls) > MAX_URLS_PER_REQUEST:
+        await message.answer(
+            f"{EMOJIS['warning']} Принято первых {MAX_URLS_PER_REQUEST} из {len(urls)} ссылок")
+        urls = urls[:MAX_URLS_PER_REQUEST]
+
+    # Учет активного запроса
+    active_requests[user_id] += 1
+
+    try:
+        async with request_semaphore:
+            await process_urls(message, urls)
+    finally:
+        active_requests[user_id] = max(0, active_requests[user_id] - 1)
+        if active_requests[user_id] == 0:
+            del active_requests[user_id]
 
 
 async def main():
